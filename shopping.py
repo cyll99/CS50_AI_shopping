@@ -1,6 +1,7 @@
 import csv
 import sys
 
+
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 
@@ -59,7 +60,59 @@ def load_data(filename):
     labels should be the corresponding list of labels, where each label
     is 1 if Revenue is true, and 0 otherwise.
     """
-    raise NotImplementedError
+    evidence, labels = list(), list()
+    month = dict(
+        Jan = 0,
+        Feb = 1,
+        Mar = 2,
+        Apr = 3,
+        May = 4,
+        Jun = 5,
+        Jul = 6,
+        Aug = 7,
+        Sep = 8,
+        Oct = 9,
+        Nov = 10,
+        Dec =11
+
+    )
+    with open(filename, newline='') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            try:
+                Administrative = int(row['Administrative'])
+                Administrative_Duration = float(row['Administrative_Duration'])
+                Informational = int(row['Informational'])
+                Informational_Duration = float(row['Informational_Duration'])
+                ProductRelated = int(row['ProductRelated'])
+                ProductRelated_Duration = float(row['ProductRelated_Duration'])
+                BounceRates = float(row['BounceRates'])
+                ExitRates = float(row['ExitRates'])
+                PageValues = float(row['PageValues'])
+                SpecialDay = float(row['SpecialDay'])
+                Month = month(row['Month'])
+                OperatingSystems = int(row['OperatingSystems'])
+                Browser = int(row['Browser'])
+                Region = int(row['Region'])
+                TrafficType = int(row['TrafficType'])
+
+                VisitorType_bool = row['VisitorType']
+                Weekend_bool = row['Weekend']
+                Revenue_bool = row['Revenue']
+
+                Weekend = 0 if Weekend_bool == "FALSE" else 1
+                Revenue = 0 if Revenue_bool == "FALSE" else 1
+                VisitorType = 0 if VisitorType_bool == "New_Visitor" else 1
+            except:
+                pass
+            
+            evidences = [Administrative, Administrative_Duration, Informational,Informational_Duration, ProductRelated,
+                         ProductRelated_Duration, BounceRates, ExitRates, PageValues, SpecialDay, Month, OperatingSystems,
+                         Browser, Region, TrafficType, VisitorType, Weekend
+                         ]
+            evidence.append(evidences)
+            labels.append(Revenue)
+    return (evidence, labels)
 
 
 def train_model(evidence, labels):
