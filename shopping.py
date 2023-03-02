@@ -139,7 +139,11 @@ def evaluate(labels, predictions):
     representing the "true negative rate": the proportion of
     actual negative labels that were accurately identified.
     """
-    raise NotImplementedError
+    tn, fp, fn, tp = confusion_matrix(labels, predictions).ravel()
+    sensitivity = tp / (tp + fn)
+    specificity = tn / (tn + fp)
+
+    return sensitivity, specificity
 
 
 if __name__ == "__main__":
