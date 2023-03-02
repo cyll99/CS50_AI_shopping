@@ -1,5 +1,7 @@
 import csv
 import sys
+from sklearn.metrics import confusion_matrix
+import pandas
 
 
 from sklearn.model_selection import train_test_split
@@ -61,58 +63,40 @@ def load_data(filename):
     is 1 if Revenue is true, and 0 otherwise.
     """
     evidence, labels = list(), list()
-    month = dict(
-        Jan = 0,
-        Feb = 1,
-        Mar = 2,
-        Apr = 3,
-        May = 4,
-        Jun = 5,
-        Jul = 6,
-        Aug = 7,
-        Sep = 8,
-        Oct = 9,
-        Nov = 10,
-        Dec =11
+    months = {'Jan': 0,
+              'Feb': 1,
+              'Mar': 2,
+              'Apr': 3,
+              'May': 4,
+              'June': 5,
+              'Jul': 6,
+              'Aug': 7,
+              'Sep': 8,
+              'Oct': 9,
+              'Nov': 10,
+              'Dec': 11}
 
-    )
-    with open(filename, newline='') as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            try:
-                Administrative = int(row['Administrative'])
-                Administrative_Duration = float(row['Administrative_Duration'])
-                Informational = int(row['Informational'])
-                Informational_Duration = float(row['Informational_Duration'])
-                ProductRelated = int(row['ProductRelated'])
-                ProductRelated_Duration = float(row['ProductRelated_Duration'])
-                BounceRates = float(row['BounceRates'])
-                ExitRates = float(row['ExitRates'])
-                PageValues = float(row['PageValues'])
-                SpecialDay = float(row['SpecialDay'])
-                Month = month(row['Month'])
-                OperatingSystems = int(row['OperatingSystems'])
-                Browser = int(row['Browser'])
-                Region = int(row['Region'])
-                TrafficType = int(row['TrafficType'])
+    # read csv file
+    csv_file = pandas.read_csv(filename)
 
-                VisitorType_bool = row['VisitorType']
-                Weekend_bool = row['Weekend']
-                Revenue_bool = row['Revenue']
+    # prepare labels dataframe
+    labels_df = csv_file['Revenue']
 
-                Weekend = 0 if Weekend_bool == "FALSE" else 1
-                Revenue = 0 if Revenue_bool == "FALSE" else 1
-                VisitorType = 0 if VisitorType_bool == "New_Visitor" else 1
-            except:
-                pass
-            
-            evidences = [Administrative, Administrative_Duration, Informational,Informational_Duration, ProductRelated,
-                         ProductRelated_Duration, BounceRates, ExitRates, PageValues, SpecialDay, Month, OperatingSystems,
-                         Browser, Region, TrafficType, VisitorType, Weekend
-                         ]
-            evidence.append(evidences)
-            labels.append(Revenue)
-    return (evidence, labels)
+    # prepare evidence dataframe
+    evidence_df = csv_file.drop(columns=['Revenue'])
+
+    # replace month names with numerical values
+    evidence_df = evidence_df.replace(months)
+
+    # replace boolean with 0/1 values
+    evidence_df['VisitorType'] = evidence_df['VisitorType'].apply(lambda x: 1 if x == 'Returning_Visitor' else 0)
+    evidence_df['Weekend'] = evidence_df['Weekend'].apply(lambda x: 1 if x == 'True' else 0)
+    labels_df = labels_df.apply(lambda x: 1 if x is True else 0)
+
+    # convert dataframes to lists
+    evidence = evidence_df.values.tolist()
+    labels = labels_df.values.tolist()
+    return evidence, labels
 
 
 def train_model(evidence, labels):
